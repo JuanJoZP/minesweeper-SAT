@@ -26,7 +26,7 @@ def escribir_rejilla(self, literal):
 '''
 
 
-def closeBy(x, y, matriz):
+def nearby(x, y, matriz):
     """devuelve las casillas tapadas aledañas a (x, y)"""
     r = []
     for i in [-1, 0, 1]:
@@ -45,7 +45,7 @@ def init_MenC(descriptor, matriz):
         for j in range(len(matriz[i])):
             casilla = matriz[i][j]
             if casilla != 0 and casilla != 9:
-                close = closeBy(i, j, matriz)
+                close = nearby(i, j, matriz)
                 for xy in close:
                     m[xy[0]][xy[1]] = descriptor.P([xy[0], xy[1]])
     return m
