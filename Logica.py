@@ -169,8 +169,9 @@ class Descriptor :
     Output: str de longitud 1
     '''
 
-    def __init__ (sel,chrInit=256) :
+    def __init__ (self,args_lista,chrInit=256) :
         self.args_lista = args_lista
+        assert(len(args_lista) > 0), "Debe haber por lo menos un argumento"
         self.chrInit = chrInit
         self.rango = [chrInit, chrInit + np.prod(self.args_lista)]
 

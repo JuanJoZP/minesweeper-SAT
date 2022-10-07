@@ -27,6 +27,7 @@ def escribir_rejilla(self, literal):
 
 
 def closeBy(x, y, matriz):
+    """devuelve las casillas tapadas aledañas a (x, y)"""
     r = []
     for i in [-1, 0, 1]:
         for j in [-1, 0, 1]:
@@ -37,43 +38,37 @@ def closeBy(x, y, matriz):
 
 
 def init_MenC(descriptor, matriz):
-    m = np.zeros((len(matriz), len(matriz[0])), dtype=int)
-    for i in range(matriz):
-        for j in range(matriz[i]):
+    """inicializa los atomos del descriptor MenC y los ubica en
+    una matriz con sus coordenadas correspondientes"""
+    m = [[None] * len(matriz) for i in range(len(matriz[0]))]
+    for i in range(len(matriz)):
+        for j in range(len(matriz[i])):
             casilla = matriz[i][j]
             if casilla != 0 and casilla != 9:
-                # si las casillas aledañas son 9 crea el descriptor
                 close = closeBy(i, j, matriz)
                 for xy in close:
-                    m[xy[0], xy[1]] = descriptor.P([xy[0], xy[1]])
+                    m[xy[0]][xy[1]] = descriptor.P([xy[0], xy[1]])
+    return m
 
 
 class Tablero:
 
     '''
-    Clase para representar el problema de poner
-    tres caballos en un tablero de ajedrez sin que se
-    puedan atacar el uno al otro.
+    Clase para representar el tablero de buscaminas, los descriptores y las reglas
     '''
 
-    def __init__(self):
-        self.matriz = [
-            [0, 0, 0, 1, 9, 9, 9, 9], [0, 0, 1, 2, 9, 9, 9, 9],
-            [0, 1, 2, 9, 9, 9, 9, 9], [0, 1, 9, 9, 9, 9, 9, 9],
-            [0, 1, 1, 3, 9, 9, 9, 9], [0, 0, 0, 2, 9, 9, 9, 9],
-            [1, 2, 1, 2, 9, 9, 9, 9], [9, 9, 9, 9, 9, 9, 9, 9]
-        ]
+    def __init__(self, width_x, width_y, tablero):
+        self.matriz = tablero
 
-        self.MenC = Descriptor([8, 8])
+        self.MenC = Descriptor([width_x, width_y])
         #self.CenC.escribir = MethodType(escribir_caballos, self.CenC)
         MenC_matriz = init_MenC(self.MenC, self.matriz)
         for row in MenC_matriz:
-            for d in row:
-                print(d)
+            print(row)
         r1 = self.regla1()
 
     def regla1(self):
-        casillas = [(x, y) for x in range(3) for y in range(3)]
+        """casillas = [(x, y) for x in range(3) for y in range(3)]
         tripletas = list(combinations(casillas, 3))
         lista = []
         for t in tripletas:
@@ -84,25 +79,13 @@ class Tablero:
             lista_negs = ['-' + self.CenC.P([*c]) for c in otras_casillas]
             f = '(' + f + 'Y' + Ytoria(lista_negs) + ')'
             lista.append(f)
-        return Otoria(lista)
+        return Otoria(lista)"""
 
-    def regla2(self):
-        tripletas = [((0, 0), (1, 2), (2, 1)),
-                     ((1, 0), (0, 2), (2, 2)),
-                     ((2, 0), (1, 2), (0, 1)),
-                     ((0, 1), (2, 2), (2, 0)),
-                     ((2, 1), (0, 2), (0, 0)),
-                     ((0, 2), (1, 0), (2, 1)),
-                     ((1, 2), (0, 0), (2, 0)),
-                     ((2, 2), (0, 1), (1, 0)),
-                     ]
-        lista = []
-        for t in tripletas:
-            c1, c2, c3 = t
-            f = '(' + self.CenC.P([*c1]) + '>-(' + \
-                self.CenC.P([*c2]) + 'O' + self.CenC.P([*c3]) + '))'
-            lista.append(f)
-        return Ytoria(lista)
 
-    def regla3(self):
-        return self.CenC.P([1, 2])
+matriz = [
+    [0, 0, 0, 1, 9, 9, 9, 9], [0, 0, 1, 2, 9, 9, 9, 9],
+    [0, 1, 2, 9, 9, 9, 9, 9], [0, 1, 9, 9, 9, 9, 9, 9],
+    [0, 1, 1, 3, 9, 9, 9, 9], [0, 0, 0, 2, 9, 9, 9, 9],
+    [1, 2, 1, 2, 9, 9, 9, 9], [9, 9, 9, 9, 9, 9, 9, 9]
+]
+tablero = Tablero(8, 8, matriz)
