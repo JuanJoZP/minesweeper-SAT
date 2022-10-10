@@ -1,33 +1,43 @@
-from itertools import combinations
 from Logica import *
 from types import MethodType
-import numpy as np
+from itertools import combinations
 
-'''
-def escribir_caballos(self, literal):
+"""
+def SATtabla(A):
+    letras = A.letras()
+    inter_a = list(product(*[[True, False] for i in letras]))
+    I_map = []
+    solutions = []
+    for i in inter_a:
+        I_temp = {}
+        j_index = 0
+        for j in letras:
+            I_temp[j] = i[j_index]
+            j_index += 1
+        I_map.append(I_temp)
+
+    for i in I_map:
+        if A.valor(i):
+            solutions.append(i)
+    return solutions
+"""
+
+
+def escribir_mina(self, literal):
     if '-' in literal:
         atomo = literal[1:]
         neg = ' no'
     else:
         atomo = literal
         neg = ''
-    x, y  = self.inv(atomo)
-    return f"El caballo{neg} está en la casilla ({x},{y})"
-
-def escribir_rejilla(self, literal):
-    if '-' in literal:
-        atomo = literal[1:]
-        neg = ' no'
-    else:
-        atomo = literal
-        neg = ''
-    n, x, y  = self.inv(atomo)
-    return f"El número {n}{neg} está en la casilla ({x},{y})"
-'''
+    x, y = self.inv(atomo)
+    return f"{neg} hay una mina en la casilla ({x},{y})"
 
 
 def nearby(x, y, matriz):
-    """devuelve las casillas tapadas aledañas a (x, y)"""
+    """devuelve las casillas tapadas aledañas a (x, y).
+       devuelve una lista de tuplas con el formato (a, b)
+    """
     r = []
     for i in [-1, 0, 1]:
         for j in [-1, 0, 1]:
@@ -51,41 +61,49 @@ def init_MenC(descriptor, matriz):
     return m
 
 
+def C_n(x, y, matriz, minas):
+    """devuelve una lista con las posibles combinaciones
+    de minas para una casilla destapada"""
+    comb = []
+    close = nearby(y, x, matriz)
+    casilla = matriz[y][x]
+    if casilla != 0 and casilla != 9:
+        m_comb = combinations(close, casilla)
+
+        for dist in m_comb:
+            pos_comb = []
+            for mina in dist:
+                pos_comb.append(minas[mina[0]][mina[1]])
+            for n_mina in close:
+                if (n_mina not in dist):
+                    pos_comb.append("-"+minas[n_mina[0]][n_mina[1]])
+
+            comb.append(pos_comb)
+
+    return comb
+
+
 class Tablero:
 
     '''
     Clase para representar el tablero de buscaminas, los descriptores y las reglas
     '''
 
-    def __init__(self, width_x, width_y, tablero):
+    def __init__(self, length_x, width_y, tablero):
         self.matriz = tablero
 
-        self.MenC = Descriptor([width_x, width_y])
-        #self.CenC.escribir = MethodType(escribir_caballos, self.CenC)
-        MenC_matriz = init_MenC(self.MenC, self.matriz)
-        for row in MenC_matriz:
-            print(row)
-        r1 = self.regla1()
+        self.MenC = Descriptor([length_x, width_y])
+        self.MenC.escribir = MethodType(escribir_mina, self.MenC)
+        self.matriz_minas = init_MenC(self.MenC, self.matriz)
+        self.regla = self.regla1()
 
     def regla1(self):
-        """casillas = [(x, y) for x in range(3) for y in range(3)]
-        tripletas = list(combinations(casillas, 3))
-        lista = []
-        for t in tripletas:
-            c1, c2, c3 = t
-            f = '((' + self.CenC.P([*c1]) + 'Y' + \
-                self.CenC.P([*c2]) + ')Y' + self.CenC.P([*c3]) + ')'
-            otras_casillas = [c for c in casillas if c not in t]
-            lista_negs = ['-' + self.CenC.P([*c]) for c in otras_casillas]
-            f = '(' + f + 'Y' + Ytoria(lista_negs) + ')'
-            lista.append(f)
-        return Otoria(lista)"""
-
-
-matriz = [
-    [0, 0, 0, 1, 9, 9, 9, 9], [0, 0, 1, 2, 9, 9, 9, 9],
-    [0, 1, 2, 9, 9, 9, 9, 9], [0, 1, 9, 9, 9, 9, 9, 9],
-    [0, 1, 1, 3, 9, 9, 9, 9], [0, 0, 0, 2, 9, 9, 9, 9],
-    [1, 2, 1, 2, 9, 9, 9, 9], [9, 9, 9, 9, 9, 9, 9, 9]
-]
-tablero = Tablero(8, 8, matriz)
+        rule = []
+        for i in range(len(self.matriz)):
+            for j in range(len(self.matriz[0])):
+                if self.matriz[i][j] != 0 and self.matriz[i][j] != 9:
+                    comb = []
+                    for pos_comb in C_n(j, i, self.matriz, self.matriz_minas):
+                        comb.append(Ytoria(pos_comb))
+                    rule.append(Otoria(comb))
+        return Ytoria(rule)
