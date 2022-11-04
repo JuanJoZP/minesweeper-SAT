@@ -1,59 +1,95 @@
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 import chromedriver_autoinstaller
-from random import randint
+
+from utils import numeros
+from Problemas import Tablero
+import time
 
 
-chromedriver_autoinstaller.install()
-driver = webdriver.Chrome()
-actionChains = ActionChains(driver)
-driver.get("https://buscaminas-pro.com/")
+class Jugador:
+
+    def __init__(self):
+        chromedriver_autoinstaller.install()
+        self.driver = webdriver.Chrome()
+        self.driver.get("https://buscaminas-pro.com/")
+        self.actionChains = ActionChains(self.driver)
+        self.tablero = Tablero(9, 9)
+        self.tablero.update([[9 for j in range(9)] for i in range(9)])
+        self.first = True
+        self.estancado = False
+        self.acabo = False
+
+    def casilla_id(self, yx):
+        """"devuelve el id de html correspondiente a la casilla"""
+        tile = yx[1]*9+yx[0]
+        return "tile{0}".format(tile)
+
+    def turno(self):
+        """da click izquierdo en la pagina web a las casillas sin minas
+        para destaparlas.
+        da click derecho en la pagina web a las casillas con minas
+        para marcarlas con la bandera"""
+        interpretacion = self.sacar_interpretacion()
+        print(interpretacion)
+        for letra in interpretacion:
+            yx = self.tablero.MenC.inv(letra)
+            id = self.casilla_id(yx)
+            casilla = self.driver.find_element("id", id)
+            if interpretacion[letra] == 1:
+                self.actionChains.context_click(casilla).perform()
+            elif interpretacion[letra] == -1:
+                self.actionChains.click(casilla).perform()
+
+    def jugar(self):
+        if self.first:
+            casilla = self.driver.find_element("id", "tile1")
+            self.actionChains.click(casilla).perform()
+            time.sleep(1)
+
+        while not self.estancado and not self.acabo:
+            self.actualizar_tablero()
+            self.turno()
+            time.sleep(1)
+
+    def actualizar_tablero(self):
+        """Obtiene la matriz del tablero en la pagina web y actualiza la clase tablero"""
+        matriz = []
+        for i in range(9):
+            row = []
+            for j in range(9):
+                row.append(numeros[self.driver.find_element(
+                    "id", self.casilla_id((j, i))).get_attribute("src")])
+            matriz.append(row)
+        self.tablero.update(matriz)
+
+    def sacar_interpretacion(self):
+        result = {}
+        soluciones = self.tablero.SATtabla()
+
+        for letra in soluciones[0]:
+            result[letra] = 0
+
+        for solucion in self.tablero.SATtabla():
+            for letra in solucion:
+                if solucion[letra] == True:
+                    result[letra] += 1
+
+        for letra in result:
+            if result[letra] == len(soluciones):
+                result[letra] = 1
+            elif result[letra] == 0:
+                result[letra] = -1
+            else:
+                result[letra] = 0
+
+        return result
 
 
-def casilla_id(xy):
-    tile = xy[1]*9+xy[0]
-    return "tile{0}".format(tile)
-
-
-def minas(interpretacion):
-    resultado = []
-    for i in interpretacion:
-        if interpretacion[i] == 1:
-            resultado.append(i)
-    return resultado
-
-
-def libres(interpretacion):
-    resultado = []
-    for i in interpretacion:
-        if interpretacion[i] == -1:
-            resultado.append(i)
-    return resultado
-
-
-def marcar_minas(minas):
-    for xy in minas:
-        id = casilla_id(xy)
-        casilla = driver.find_element("id", id)
-        actionChains.context_click(casilla).perform()
-
-
-def destapar_casillas(casillas):
-    for xy in casillas:
-        id = casilla_id(xy)
-        casilla = driver.find_element("id", id)
-        actionChains.click(casilla).perform()
-# oe eso no me deja crear variables, lo toma como si estuviera agarrando algo de un modulo no importado y dice que no esta accesed
-
-
-# datos de ejemplo
-interpretacion = {}
-for x in range(8):
-    for y in range(8):
-        rand = randint(-10, 10)
-        interpretacion[(x, y)] = 0 if rand != 1 and rand != -1 else rand
-
-print("\n".join("{}\t{}".format(k, v) for k, v in interpretacion.items()))
-# marcar_minas(minas(interpretacion))
-# cuidado porque si destapa mina, las que van despues no sirven
-destapar_casillas(libres(interpretacion))
+mec = Jugador()
+mec.tablero.update([[0, 0, 0, 1, 9, 9, 9, 9], [0, 0, 1, 2, 9, 9, 9, 9],
+                   [0, 1, 2, 9, 9, 9, 9, 9], [0, 1, 9, 9, 9, 9, 9, 9],
+                   [0, 1, 1, 3, 9, 9, 9, 9], [0, 0, 0, 2, 9, 9, 9, 9],
+                   [1, 2, 1, 2, 9, 9, 9, 9], [9, 9, 9, 9, 9, 9, 9, 9]])
+mec.sacar_interpretacion()
+mec.jugar()

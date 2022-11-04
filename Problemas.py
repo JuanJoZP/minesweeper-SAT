@@ -2,26 +2,6 @@ from Logica import *
 from types import MethodType
 from itertools import combinations
 
-"""
-def SATtabla(A):
-    letras = A.letras()
-    inter_a = list(product(*[[True, False] for i in letras]))
-    I_map = []
-    solutions = []
-    for i in inter_a:
-        I_temp = {}
-        j_index = 0
-        for j in letras:
-            I_temp[j] = i[j_index]
-            j_index += 1
-        I_map.append(I_temp)
-
-    for i in I_map:
-        if A.valor(i):
-            solutions.append(i)
-    return solutions
-"""
-
 
 def escribir_mina(self, literal):
     if '-' in literal:
@@ -89,11 +69,16 @@ class Tablero:
     Clase para representar el tablero de buscaminas, los descriptores y las reglas
     '''
 
-    def __init__(self, length_x, width_y, tablero):
-        self.matriz = tablero
+    def __init__(self, length_x, width_y):
+        self.matriz = []
+        self.matriz_minas = []
 
         self.MenC = Descriptor([length_x, width_y])
         self.MenC.escribir = MethodType(escribir_mina, self.MenC)
+        self.regla = ""
+
+    def update(self, tablero):
+        self.matriz = tablero
         self.matriz_minas = init_MenC(self.MenC, self.matriz)
         self.regla = self.regla1()
 
@@ -107,3 +92,22 @@ class Tablero:
                         comb.append(Ytoria(pos_comb))
                     rule.append(Otoria(comb))
         return Ytoria(rule)
+
+    def SATtabla(self):
+        A = inorder_to_tree(self.regla)
+        letras = A.letras()
+        inter_a = list(product(*[[True, False] for i in letras]))
+        I_map = []
+        solutions = []
+        for i in inter_a:
+            I_temp = {}
+            j_index = 0
+            for j in letras:
+                I_temp[j] = i[j_index]
+                j_index += 1
+            I_map.append(I_temp)
+
+        for i in I_map:
+            if A.valor(i):
+                solutions.append(i)
+        return solutions
