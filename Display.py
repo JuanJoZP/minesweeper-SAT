@@ -31,7 +31,6 @@ class Jugador:
         da click derecho en la pagina web a las casillas con minas
         para marcarlas con la bandera"""
         interpretacion = self.sacar_interpretacion()
-        print(interpretacion)
         for letra in interpretacion:
             yx = self.tablero.MenC.inv(letra)
             id = self.casilla_id(yx)
@@ -59,7 +58,7 @@ class Jugador:
             row = []
             for j in range(9):
                 row.append(numeros[self.driver.find_element(
-                    "id", self.casilla_id((j, i))).get_attribute("src")])
+                    "id", self.casilla_id((i, j))).get_attribute("src")])
             matriz.append(row)
         self.tablero.update(matriz)
 
@@ -87,9 +86,4 @@ class Jugador:
 
 
 mec = Jugador()
-mec.tablero.update([[0, 0, 0, 1, 9, 9, 9, 9], [0, 0, 1, 2, 9, 9, 9, 9],
-                   [0, 1, 2, 9, 9, 9, 9, 9], [0, 1, 9, 9, 9, 9, 9, 9],
-                   [0, 1, 1, 3, 9, 9, 9, 9], [0, 0, 0, 2, 9, 9, 9, 9],
-                   [1, 2, 1, 2, 9, 9, 9, 9], [9, 9, 9, 9, 9, 9, 9, 9]])
-mec.sacar_interpretacion()
 mec.jugar()

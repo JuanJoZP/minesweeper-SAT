@@ -46,9 +46,12 @@ def C_n(x, y, matriz, minas):
     de minas para una casilla destapada"""
     comb = []
     close = nearby(y, x, matriz)
+    m_close = [c for c in close if matriz[c[1]][c[0]] == -1]
+    #m_close = [c for c in close if matriz[c[0]][c[1]] == -1]
+
     casilla = matriz[y][x]
-    if casilla != 0 and casilla != 9:
-        m_comb = combinations(close, casilla)
+    if casilla != 0 and casilla != 9 and casilla != -1:
+        m_comb = combinations(close, casilla-len(m_close))
 
         for dist in m_comb:
             pos_comb = []
@@ -88,9 +91,11 @@ class Tablero:
             for j in range(len(self.matriz[0])):
                 if self.matriz[i][j] != 0 and self.matriz[i][j] != 9:
                     comb = []
-                    for pos_comb in C_n(j, i, self.matriz, self.matriz_minas):
-                        comb.append(Ytoria(pos_comb))
-                    rule.append(Otoria(comb))
+                    c_n = C_n(j, i, self.matriz, self.matriz_minas)
+                    if len(c_n) != 0:
+                        for pos_comb in c_n:
+                            comb.append(Ytoria(pos_comb))
+                        rule.append(Otoria(comb))
         return Ytoria(rule)
 
     def SATtabla(self):
@@ -110,4 +115,9 @@ class Tablero:
         for i in I_map:
             if A.valor(i):
                 solutions.append(i)
+
+        print(f"----------SOLUCIONES: {len(solutions)}-------------")
+        print("regla:")
+        print(self.regla)
+        print("***************************************************")
         return solutions
