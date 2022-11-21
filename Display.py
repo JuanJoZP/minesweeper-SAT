@@ -83,7 +83,3 @@ class Jugador:
                 result[letra] = 0
 
         return result
-
-
-mec = Jugador()
-mec.jugar()

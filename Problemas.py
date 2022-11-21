@@ -116,8 +116,4 @@ class Tablero:
             if A.valor(i):
                 solutions.append(i)
 
-        print(f"----------SOLUCIONES: {len(solutions)}-------------")
-        print("regla:")
-        print(self.regla)
-        print("***************************************************")
         return solutions
