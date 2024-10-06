@@ -1,16 +1,19 @@
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-import chromedriver_autoinstaller
 
 from utils import numeros
 from Problemas import Tablero
 import time
 
+# reformats:
+# en ingles todo
+# nombre Jugador -> 
+# variables de init a ingles
+# todso metodos a ingles
 
 class Jugador:
 
     def __init__(self):
-        chromedriver_autoinstaller.install()
         self.driver = webdriver.Chrome()
         self.driver.get("https://buscaminas-pro.com/")
         self.actionChains = ActionChains(self.driver)
@@ -52,7 +55,7 @@ class Jugador:
             time.sleep(1)
 
     def actualizar_tablero(self):
-        """Obtiene la matriz del tablero en la pagina web y actualiza la clase tablero"""
+        """Obtiene la matriz del tablero en la pagina web y la actualiza en la clase tablero"""
         matriz = []
         for i in range(9):
             row = []
@@ -83,3 +86,7 @@ class Jugador:
                 result[letra] = 0
 
         return result
+
+if __name__ == "__main__":
+    jugador = Jugador()
+    jugador.jugar()
