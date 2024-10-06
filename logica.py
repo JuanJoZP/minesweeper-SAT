@@ -7,12 +7,13 @@ from itertools import product
 import numpy as np
 from copy import deepcopy
 
-class Formula :
 
-    def __init__(self) :
+class Formula:
+
+    def __init__(self):
         pass
 
-    def __str__(self) :
+    def __str__(self):
         if type(self) == Letra:
             return self.letra
         elif type(self) == Negacion:
@@ -36,7 +37,7 @@ class Formula :
         elif type(self) == Binario:
             return list(set([str(self)] + self.left.subforms() + self.right.subforms()))
 
-    def valor(self, I) :
+    def valor(self, I):
         if type(self) == Letra:
             return I[self.letra]
         elif type(self) == Negacion:
@@ -49,7 +50,9 @@ class Formula :
             if self.conectivo == '>':
                 return not self.left.valor(I) or self.right.valor(I)
             if self.conectivo == '=':
-                return (self.left.valor(I) and self.right.valor(I)) or (not self.left.valor(I) and not self.right.valor(I))
+                return (self.left.valor(I) and
+                        self.right.valor(I)) or (not self.left.valor(I) and
+                                                 not self.right.valor(I))
 
     def SATtabla(self):
         letras = list(self.letras())
@@ -123,44 +126,52 @@ class Formula :
                 try:
                     vis.append(D.escribir(c))
                 except:
-                    raise("¡Caracter inválido!")
+                    raise ("¡Caracter inválido!")
         return ''.join(vis)
 
-class Letra(Formula) :
-    def __init__ (self, letra:str) :
+
+class Letra(Formula):
+
+    def __init__(self, letra: str):
         self.letra = letra
 
-class Negacion(Formula) :
-    def __init__(self, subf:Formula) :
+
+class Negacion(Formula):
+
+    def __init__(self, subf: Formula):
         self.subf = subf
 
-class Binario(Formula) :
-    def __init__(self, conectivo:str, left:Formula, right:Formula) :
-        assert(conectivo in ['Y','O','>','='])
+
+class Binario(Formula):
+
+    def __init__(self, conectivo: str, left: Formula, right: Formula):
+        assert (conectivo in ['Y', 'O', '>', '='])
         self.conectivo = conectivo
         self.left = left
         self.right = right
 
-def inorder_to_tree(cadena:str):
+
+def inorder_to_tree(cadena: str):
     conectivos = ['Y', 'O', '>', '=']
     if len(cadena) == 1:
         return Letra(cadena)
     elif cadena[0] == '-':
         return Negacion(inorder_to_tree(cadena[1:]))
     elif cadena[0] == "(":
-        counter = 0 #Contador de parentesis
+        counter = 0  #Contador de parentesis
         for i in range(1, len(cadena)):
             if cadena[i] == "(":
                 counter += 1
             elif cadena[i] == ")":
-                counter -=1
+                counter -= 1
             elif cadena[i] in conectivos and counter == 0:
-                return Binario(cadena[i], inorder_to_tree(cadena[1:i]),inorder_to_tree(cadena[i + 1:-1]))
+                return Binario(cadena[i], inorder_to_tree(cadena[1:i]),
+                               inorder_to_tree(cadena[i + 1:-1]))
     else:
         raise Exception('¡Cadena inválida!')
 
-class Descriptor :
 
+class Descriptor:
     '''
     Codifica un descriptor de N argumentos mediante un solo caracter
     Input:  args_lista, lista con el total de opciones para cada
@@ -169,43 +180,45 @@ class Descriptor :
     Output: str de longitud 1
     '''
 
-    def __init__ (self,args_lista,chrInit=256) :
+    def __init__(self, args_lista, chrInit=256):
         self.args_lista = args_lista
-        assert(len(args_lista) > 0), "Debe haber por lo menos un argumento"
+        assert (len(args_lista) > 0), "Debe haber por lo menos un argumento"
         self.chrInit = chrInit
         self.rango = [chrInit, chrInit + np.prod(self.args_lista)]
 
-    def check_lista_valores(self,lista_valores) :
-        for i, v in enumerate(lista_valores) :
-            assert(v >= 0), "Valores deben ser no negativos"
-            assert(v < self.args_lista[i]), f"Valor debe ser menor o igual a {self.args_lista[i]}"
+    def check_lista_valores(self, lista_valores):
+        for i, v in enumerate(lista_valores):
+            assert (v >= 0), "Valores deben ser no negativos"
+            assert (v < self.args_lista[i]
+                   ), f"Valor debe ser menor o igual a {self.args_lista[i]}"
 
-    def codifica(self,lista_valores) :
+    def codifica(self, lista_valores):
         self.check_lista_valores(lista_valores)
         cod = lista_valores[0]
         n_columnas = 1
-        for i in range(0, len(lista_valores) - 1) :
+        for i in range(0, len(lista_valores) - 1):
             n_columnas = n_columnas * self.args_lista[i]
-            cod = n_columnas * lista_valores[i+1] + cod
+            cod = n_columnas * lista_valores[i + 1] + cod
         return cod
 
-    def decodifica(self,n) :
+    def decodifica(self, n):
         decods = []
         if len(self.args_lista) > 1:
-            for i in range(0, len(self.args_lista) - 1) :
-                n_columnas = np.prod(self.args_lista[:-(i+1)])
+            for i in range(0, len(self.args_lista) - 1):
+                n_columnas = np.prod(self.args_lista[:-(i + 1)])
                 decods.insert(0, int(n / n_columnas))
                 n = n % n_columnas
         decods.insert(0, n % self.args_lista[0])
         return decods
 
-    def P(self,lista_valores) :
+    def P(self, lista_valores):
         codigo = self.codifica(lista_valores)
-        return chr(self.chrInit+codigo)
+        return chr(self.chrInit + codigo)
 
-    def inv(self,codigo) :
-        n = ord(codigo)-self.chrInit
+    def inv(self, codigo):
+        n = ord(codigo) - self.chrInit
         return self.decodifica(n)
+
 
 def Ytoria(lista_forms):
     form = ''
@@ -218,6 +231,7 @@ def Ytoria(lista_forms):
             form = '(' + form + 'Y' + f + ')'
     return form
 
+
 def Otoria(lista_forms):
     form = ''
     inicial = True
@@ -228,6 +242,7 @@ def Otoria(lista_forms):
         else:
             form = '(' + form + 'O' + f + ')'
     return form
+
 
 class nodos_tableaux:
 
@@ -284,11 +299,11 @@ class nodos_tableaux:
                 formulas = [f.subf.left, Negacion(f.subf.right)]
             for nueva_f in formulas:
                 clasf = nueva_f.clasifica_para_tableaux()
-                if clasf[1]== 'alfa':
+                if clasf[1] == 'alfa':
                     lista = f_alfas
-                elif clasf[1]== 'beta':
+                elif clasf[1] == 'beta':
                     lista = f_betas
-                elif clasf[1]== 'literal':
+                elif clasf[1] == 'literal':
                     lista = f_literales
                 strs = [c[1] for c in lista]
                 if str(nueva_f) not in strs:
@@ -313,21 +328,21 @@ class nodos_tableaux:
             f_betas2 = deepcopy(f_betas)
             f_literales2 = deepcopy(f_literales)
             clasf = B1.clasifica_para_tableaux()
-            if clasf[1]== 'alfa':
+            if clasf[1] == 'alfa':
                 lista = f_alfas
-            elif clasf[1]== 'beta':
+            elif clasf[1] == 'beta':
                 lista = f_betas
-            elif clasf[1]== 'literal':
+            elif clasf[1] == 'literal':
                 lista = f_literales
             strs = [c[1] for c in lista]
             if str(B1) not in strs:
                 lista.append((B1, str(B1), *clasf))
             clasf = B2.clasifica_para_tableaux()
-            if clasf[1]== 'alfa':
+            if clasf[1] == 'alfa':
                 lista = f_alfas2
-            elif clasf[1]== 'beta':
+            elif clasf[1] == 'beta':
                 lista = f_betas2
-            elif clasf[1]== 'literal':
+            elif clasf[1] == 'literal':
                 lista = f_literales2
             strs = [c[1] for c in lista]
             if str(B2) not in strs:
