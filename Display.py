@@ -2,14 +2,8 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 
 from utils import numeros
-from Problemas import Tablero
+from minesweeper import Tablero
 import time
-
-# reformats:
-# en ingles todo
-# nombre Jugador -> 
-# variables de init a ingles
-# todso metodos a ingles
 
 class Jugador:
 
@@ -67,12 +61,12 @@ class Jugador:
 
     def sacar_interpretacion(self):
         result = {}
-        soluciones = self.tablero.SATtabla()
+        soluciones = self.tablero.solve()
 
         for letra in soluciones[0]:
             result[letra] = 0
 
-        for solucion in self.tablero.SATtabla():
+        for solucion in self.tablero.solve():
             for letra in solucion:
                 if solucion[letra] == True:
                     result[letra] += 1

@@ -1,5 +1,5 @@
-from Problemas import Tablero
-from Problemas import inorder_to_tree
+from minesweeper import Minesweeper
+from minesweeper import inorder_to_tree
 
 matriz_inicial= [
     [0, 0, 1, 9, 9, 9, 9, 9],
@@ -23,16 +23,16 @@ matriz_2= [
     [9, 9, 9, 9, 9, 9, 9, 9],
     ]  
 
-tab = Tablero(9, 9)
+tab = Minesweeper(9, 9)
 tab.update(matriz_2)
-for interpretacion in tab.SATtabla():
+for interpretacion in tab.solve():
    print(interpretacion)
 
 #print(inorder_to_tree(tab.regla))
 
-for (i, row) in enumerate(tab.matriz_minas):
+for (i, row) in enumerate(tab.bomb_matrix):
     for (j, c) in enumerate(row):
         if c == None:
-            row[j] = tab.matriz[i][j]
+            row[j] = tab.board_matrix[i][j]
     frmt = "{:>3}"*len(row)
     print(frmt.format(*row))
